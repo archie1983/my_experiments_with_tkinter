@@ -10,14 +10,7 @@ class AddClass:
 
     def __init__(self):
         self.window = tk.Tk()
-    
-        # Frame containing current classes
-        self.frmClasses = tk.Frame(self.window,
-            border=1,
-            relief=tk.GROOVE,
-            background="blue",
-        )
-    
+        
         # variables holding the input values
         self.txt_name_val = tk.StringVar()
         self.txt_descr_val = tk.StringVar()
@@ -45,18 +38,24 @@ class AddClass:
         frmScroller4Classes.grid(row=2, column=0, columnspan=2, sticky=tk.N+tk.S)
         
         # Creating canvas on scroller frame
-        canvas = tk.Canvas(frmScroller4Classes)
-        canvas.grid(row=0, column=0)
+        self.canvas = tk.Canvas(frmScroller4Classes)
+        self.canvas.grid(row=0, column=0)
         
         # Creating scrollbar for the canvas, which will be on the same scroller frame.
-        myscrollbar = tk.Scrollbar(frmScroller4Classes,orient="vertical",command=canvas.yview)
-        myscrollbar.grid(row=0, column=1)
+        myscrollbar = tk.Scrollbar(frmScroller4Classes,orient="vertical",command=self.canvas.yview)
+        myscrollbar.grid(row=0, column=1, sticky=tk.N+tk.S)
         
         # New frame for the contents on the canvas.
-        self.frmClasses = tk.Frame(canvas)
-        canvas.configure(yscrollcommand=myscrollbar.set)
-        canvas.create_window((0,0),window=self.frmClasses,anchor='nw')
-        self.frmClasses.bind("<Configure>", self.myfunction)
+        
+        # Frame containing current classes
+        self.frmClasses = tk.Frame(self.canvas,
+            border=1,
+            relief=tk.GROOVE,
+            background="blue",
+        )
+        self.canvas.configure(yscrollcommand=myscrollbar.set)
+        self.canvas.create_window((0,0),window=self.frmClasses,anchor='nw')
+        self.frmClasses.bind("<Configure>", self.onFrameConfigure)
     
         # Buttons for quitting and adding the new class
         btnAddClass = tk.Button(self.window,
@@ -78,24 +77,28 @@ class AddClass:
         
         self.window.mainloop()
         
-    def myfunction(self):
-        pass
+    def onFrameConfigure(self, event):
+        '''Reset the scroll region to encompass the inner frame'''
+        #self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"),width=200,height=200)
     
     def add_class(self):
-        global number_of_entries
         class_name = self.txt_name_val.get()
         class_descr = self.txt_descr_val.get()
         
-        lblID = tk.Label(self.frmClasses, text=(number_of_entries + 1), fg="black", font=("Arial", 10), width="10")
-        lblID.grid(row=number_of_entries, column=0)
+#        if class_name == "":
+#            return
+        
+        lblID = tk.Label(self.frmClasses, text=(self.number_of_entries + 1), fg="black", font=("Arial", 10), width="10")
+        lblID.grid(row=self.number_of_entries, column=0)
         
         lblName = tk.Label(self.frmClasses, text=class_name, fg="black", font=("Arial", 10), width="10")
-        lblName.grid(row=number_of_entries, column=1)
+        lblName.grid(row=self.number_of_entries, column=1)
         
         lblDescr = tk.Label(self.frmClasses, text=class_descr, fg="black", font=("Arial", 10), width="10")
-        lblDescr.grid(row=number_of_entries, column=2)
+        lblDescr.grid(row=self.number_of_entries, column=2)
         
-        number_of_entries += 1
+        self.number_of_entries += 1
         
         self.txt_name_val.set("")
         self.txt_descr_val.set("")
