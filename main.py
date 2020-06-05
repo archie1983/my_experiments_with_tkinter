@@ -6,46 +6,100 @@ Created on Thu Jun  4 13:30:44 2020
 """
 import tkinter as tk
 
-window = tk.Tk()
-txt_name_val = tk.StringVar()
-txt_descr_val = tk.StringVar()
+class AddClass:
 
-def createMainClassesWindow():    
-    # Name of the item class
-    lblName = tk.Label(window, text="Class name", fg="black", font=("Arial", 10), width="10")
-    lblName.grid(row=0, column=0)
-    txtName = tk.Entry(window, width=30, textvariable=txt_name_val)
-    #txtName.insert(tk.END, "Class name")
-    txtName.grid(row=0, column=1)
-
-    # Description of the item class
-    lblDescr = tk.Label(window, text="Class description", fg="black", font=("Arial", 10))
-    lblDescr.grid(row=1, column=0)
-    txtDescr = tk.Entry(window, width=30, textvariable=txt_descr_val)
-    txtDescr.grid(row=1, column=1)
-
-    btnAddClass = tk.Button(window,
-                       text="Add Class",
-                       command=add_class)
-    btnAddClass.grid(row=2, column=0)
+    def __init__(self):
+        self.window = tk.Tk()
     
-    button = tk.Button(window, 
-                       text="QUIT", 
-                       fg="red",
-                       command=window.destroy)
-    button.grid(row=2, column=1)
+        # Frame containing current classes
+        self.frmClasses = tk.Frame(self.window,
+            border=1,
+            relief=tk.GROOVE,
+            background="blue",
+        )
     
-    # add title
-    window.title("Check Out Data Entry - Main Classes")
+        # variables holding the input values
+        self.txt_name_val = tk.StringVar()
+        self.txt_descr_val = tk.StringVar()
     
-    # set frame and geometry (width x height + XPOS + YPOS)
-    window.geometry("500x500+100+200")
+        # number of entries added
+        self.number_of_entries = 0
     
-    window.mainloop()
+    def createMainClassesWindow(self):    
+        # Name of the item class
+        lblName = tk.Label(self.window, text="Class name", fg="black", font=("Arial", 10), width="10")
+        lblName.grid(row=0, column=0)
+        txtName = tk.Entry(self.window, width=30, textvariable=self.txt_name_val)
+        #txtName.insert(tk.END, "Class name")
+        txtName.grid(row=0, column=1)
     
-def add_class():
-    txt_name_val.set("AAAAA")
-    txt_descr_val.set("BBBB")
+        # Description of the item class
+        lblDescr = tk.Label(self.window, text="Class description", fg="black", font=("Arial", 10))
+        lblDescr.grid(row=1, column=0)
+        txtDescr = tk.Entry(self.window, width=30, textvariable=self.txt_descr_val)
+        txtDescr.grid(row=1, column=1)
+    
+        # Frame containing current classes
+        # 1st creating a form where we'll keep a scrolling canvas
+        frmScroller4Classes = tk.Frame(self.window)
+        frmScroller4Classes.grid(row=2, column=0, columnspan=2, sticky=tk.N+tk.S)
+        
+        # Creating canvas on scroller frame
+        canvas = tk.Canvas(frmScroller4Classes)
+        canvas.grid(row=0, column=0)
+        
+        # Creating scrollbar for the canvas, which will be on the same scroller frame.
+        myscrollbar = tk.Scrollbar(frmScroller4Classes,orient="vertical",command=canvas.yview)
+        myscrollbar.grid(row=0, column=1)
+        
+        # New frame for the contents on the canvas.
+        self.frmClasses = tk.Frame(canvas)
+        canvas.configure(yscrollcommand=myscrollbar.set)
+        canvas.create_window((0,0),window=self.frmClasses,anchor='nw')
+        self.frmClasses.bind("<Configure>", self.myfunction)
+    
+        # Buttons for quitting and adding the new class
+        btnAddClass = tk.Button(self.window,
+                           text="Add Class",
+                           command=self.add_class)
+        btnAddClass.grid(row=3, column=0)
+        
+        button = tk.Button(self.window, 
+                           text="QUIT", 
+                           fg="red",
+                           command=self.window.destroy)
+        button.grid(row=3, column=1)
+        
+        # add title
+        self.window.title("Check Out Data Entry - Main Classes")
+        
+        # set frame and geometry (width x height + XPOS + YPOS)
+        self.window.geometry("500x500+100+200")
+        
+        self.window.mainloop()
+        
+    def myfunction(self):
+        pass
+    
+    def add_class(self):
+        global number_of_entries
+        class_name = self.txt_name_val.get()
+        class_descr = self.txt_descr_val.get()
+        
+        lblID = tk.Label(self.frmClasses, text=(number_of_entries + 1), fg="black", font=("Arial", 10), width="10")
+        lblID.grid(row=number_of_entries, column=0)
+        
+        lblName = tk.Label(self.frmClasses, text=class_name, fg="black", font=("Arial", 10), width="10")
+        lblName.grid(row=number_of_entries, column=1)
+        
+        lblDescr = tk.Label(self.frmClasses, text=class_descr, fg="black", font=("Arial", 10), width="10")
+        lblDescr.grid(row=number_of_entries, column=2)
+        
+        number_of_entries += 1
+        
+        self.txt_name_val.set("")
+        self.txt_descr_val.set("")
 
 if __name__ == '__main__':
-    createMainClassesWindow()
+    add_class = AddClass()
+    add_class.createMainClassesWindow()
