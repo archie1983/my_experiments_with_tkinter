@@ -34,7 +34,10 @@ class AddClass:
     
         # Frame containing current classes
         # 1st creating a form where we'll keep a scrolling canvas
-        frmScroller4Classes = tk.Frame(self.window)
+        frmScroller4Classes = tk.Frame(self.window,
+            border=1,
+            relief=tk.GROOVE,
+            background="blue")
         frmScroller4Classes.grid(row=2, column=0, columnspan=2, sticky=tk.N+tk.S)
         
         # Creating canvas on scroller frame
@@ -48,11 +51,7 @@ class AddClass:
         # New frame for the contents on the canvas.
         
         # Frame containing current classes
-        self.frmClasses = tk.Frame(self.canvas,
-            border=1,
-            relief=tk.GROOVE,
-            background="blue",
-        )
+        self.frmClasses = tk.Frame(self.canvas)
         self.canvas.configure(yscrollcommand=myscrollbar.set)
         self.canvas.create_window((0,0),window=self.frmClasses,anchor='nw')
         self.frmClasses.bind("<Configure>", self.onFrameConfigure)
@@ -75,27 +74,29 @@ class AddClass:
         # set frame and geometry (width x height + XPOS + YPOS)
         self.window.geometry("500x500+100+200")
         
+        self.onFrameConfigure(None)
+        
         self.window.mainloop()
         
     def onFrameConfigure(self, event):
         '''Reset the scroll region to encompass the inner frame'''
         #self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-        self.canvas.configure(scrollregion=self.canvas.bbox("all"),width=200,height=200)
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"),width=400,height=200)
     
     def add_class(self):
         class_name = self.txt_name_val.get()
         class_descr = self.txt_descr_val.get()
         
-#        if class_name == "":
-#            return
+        if class_name == "":
+            return
         
-        lblID = tk.Label(self.frmClasses, text=(self.number_of_entries + 1), fg="black", font=("Arial", 10), width="10")
+        lblID = tk.Label(self.frmClasses, text=(self.number_of_entries + 1), fg="blue", font=("Arial", 10))
         lblID.grid(row=self.number_of_entries, column=0)
         
-        lblName = tk.Label(self.frmClasses, text=class_name, fg="black", font=("Arial", 10), width="10")
+        lblName = tk.Label(self.frmClasses, text=class_name, fg="blue", font=("Arial", 10))
         lblName.grid(row=self.number_of_entries, column=1)
         
-        lblDescr = tk.Label(self.frmClasses, text=class_descr, fg="black", font=("Arial", 10), width="10")
+        lblDescr = tk.Label(self.frmClasses, text=class_descr, fg="blue", font=("Arial", 10))
         lblDescr.grid(row=self.number_of_entries, column=2)
         
         self.number_of_entries += 1
