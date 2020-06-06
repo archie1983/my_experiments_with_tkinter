@@ -8,43 +8,53 @@ import tkinter as tk
 
 class AddSalesItems:
 
-    def __init__(self):
+    def __init__(self, top_classes):
         self.window = tk.Tk()
         
         # variables holding the input values
         self.txt_name_val = tk.StringVar()
         self.txt_descr_val = tk.StringVar()
+        self.parentSelection = tk.StringVar()
+        self.int_price = tk.IntVar()
     
         # number of entries added
-        self.number_of_entries = 0
+        self.number_of_entries = len(top_classes)
+        self.top_classes = top_classes
     
-    def createSalesItemInputWindow(self, top_classes):
+    def createSalesItemInputWindow(self):
         row_num = 0
-        # Name of the item class
-        lblName = tk.Label(self.window, text="Class name", fg="black", font=("Arial", 10), width="10")
+        # Name of the item
+        lblName = tk.Label(self.window, text="Item name", fg="black", font=("Arial", 10), width="10")
         lblName.grid(row=row_num, column=0)
         txtName = tk.Entry(self.window, width=30, textvariable=self.txt_name_val)
         #txtName.insert(tk.END, "Class name")
         txtName.grid(row=row_num, column=1)
         row_num += 1
     
-        # Description of the item class
-        lblDescr = tk.Label(self.window, text="Class description", fg="black", font=("Arial", 10))
+        # Description of the item
+        lblDescr = tk.Label(self.window, text="Item description", fg="black", font=("Arial", 10))
         lblDescr.grid(row=row_num, column=0)
         txtDescr = tk.Entry(self.window, width=30, textvariable=self.txt_descr_val)
         txtDescr.grid(row=row_num, column=1)
         row_num += 1
 
         # Parent class drop down box
-        lblDescr = tk.Label(self.window, text="Top class", fg="black", font=("Arial", 10))
-        lblDescr.grid(row=row_num, column=0)
-        parentSelection = tk.StringVar(self.window)
-        parentSelection.set(top_classes[0]) # default value
-        optParent = tk.OptionMenu(self.window, parentSelection, *top_classes)
+        lblTopClass = tk.Label(self.window, text="Top class", fg="black", font=("Arial", 10))
+        lblTopClass.grid(row=row_num, column=0)
+        self.parentSelection.set(self.top_classes[0]) # default value
+        opt = ["aw", "bv", "cc"]
+        optParent = tk.OptionMenu(self.window, self.parentSelection, *opt)
         optParent.grid(row=row_num, column=1)
-        row_num += 1        
+        row_num += 1
+
+        # Price of the item
+        lblPrice = tk.Label(self.window, text="Item price", fg="black", font=("Arial", 10))
+        lblPrice.grid(row=row_num, column=0)
+        txtPrice = tk.Entry(self.window, width=5, textvariable=self.int_price)
+        txtPrice.grid(row=row_num, column=1)
+        row_num += 1
     
-        # Frame containing current classes
+        # Frame containing current items
         # 1st creating a form where we'll keep a scrolling canvas
         frmScroller4Classes = tk.Frame(self.window,
             border=1,
@@ -70,10 +80,10 @@ class AddSalesItems:
         row_num += 1
     
         # Buttons for quitting and adding the new class
-        btnAddClass = tk.Button(self.window,
+        btnAddItem = tk.Button(self.window,
                            text="Add Item",
-                           command=self.add_class)
-        btnAddClass.grid(row=row_num, column=0)
+                           command=self.add_item)
+        btnAddItem.grid(row=row_num, column=0)
         
         button = tk.Button(self.window, 
                            text="QUIT", 
@@ -96,9 +106,12 @@ class AddSalesItems:
         #self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         self.canvas.configure(scrollregion=self.canvas.bbox("all"),width=400,height=200)
     
-    def add_class(self):
+    def add_item(self):
         class_name = self.txt_name_val.get()
         class_descr = self.txt_descr_val.get()
+        top_class_name = self.parentSelection.get()
+        top_class_id = 0
+        item_price = self.int_price.get()
         
         if class_name == "":
             return
@@ -112,7 +125,15 @@ class AddSalesItems:
         lblDescr = tk.Label(self.frmClasses, text=class_descr, fg="blue", font=("Arial", 10))
         lblDescr.grid(row=self.number_of_entries, column=2)
         
+        lblParent = tk.Label(self.frmClasses, text=top_class_name, fg="blue", font=("Arial", 10))
+        lblParent.grid(row=self.number_of_entries, column=3)
+
+        lblPrice = tk.Label(self.frmClasses, text=item_price, fg="blue", font=("Arial", 10))
+        lblPrice.grid(row=self.number_of_entries, column=4)
+        
         self.number_of_entries += 1
         
         self.txt_name_val.set("")
         self.txt_descr_val.set("")
+        self.parentSelection.set("")
+        self.int_price.set(0)

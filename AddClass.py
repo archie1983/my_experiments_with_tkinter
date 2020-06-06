@@ -120,5 +120,5 @@ class AddClass:
     # Opens the window that lets adding sales items with the entered classes
     # choosable parents.
     def open_sales_items_window(self):
-        si_win = asi.AddSalesItems()
-        si_win.createSalesItemInputWindow(self.top_classes)
+        si_win = asi.AddSalesItems(self.top_classes)
+        si_win.createSalesItemInputWindow()
