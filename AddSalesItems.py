@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Fri Jun  5 20:28:35 2020
+Created on Fri Jun  5 20:32:37 2020
 
 @author: aelksnis
 """
 import tkinter as tk
-import AddSalesItems as asi
 
-class AddClass:
+class AddSalesItems:
 
     def __init__(self):
         self.window = tk.Tk()
@@ -18,21 +17,32 @@ class AddClass:
     
         # number of entries added
         self.number_of_entries = 0
-        self.top_classes = []
     
-    def createMainClassesWindow(self):    
+    def createSalesItemInputWindow(self, top_classes):
+        row_num = 0
         # Name of the item class
         lblName = tk.Label(self.window, text="Class name", fg="black", font=("Arial", 10), width="10")
-        lblName.grid(row=0, column=0)
+        lblName.grid(row=row_num, column=0)
         txtName = tk.Entry(self.window, width=30, textvariable=self.txt_name_val)
         #txtName.insert(tk.END, "Class name")
-        txtName.grid(row=0, column=1)
+        txtName.grid(row=row_num, column=1)
+        row_num += 1
     
         # Description of the item class
         lblDescr = tk.Label(self.window, text="Class description", fg="black", font=("Arial", 10))
-        lblDescr.grid(row=1, column=0)
+        lblDescr.grid(row=row_num, column=0)
         txtDescr = tk.Entry(self.window, width=30, textvariable=self.txt_descr_val)
-        txtDescr.grid(row=1, column=1)
+        txtDescr.grid(row=row_num, column=1)
+        row_num += 1
+
+        # Parent class drop down box
+        lblDescr = tk.Label(self.window, text="Top class", fg="black", font=("Arial", 10))
+        lblDescr.grid(row=row_num, column=0)
+        parentSelection = tk.StringVar(self.window)
+        parentSelection.set(top_classes[0]) # default value
+        optParent = tk.OptionMenu(self.window, parentSelection, *top_classes)
+        optParent.grid(row=row_num, column=1)
+        row_num += 1        
     
         # Frame containing current classes
         # 1st creating a form where we'll keep a scrolling canvas
@@ -40,7 +50,7 @@ class AddClass:
             border=1,
             relief=tk.GROOVE,
             background="blue")
-        frmScroller4Classes.grid(row=2, column=0, columnspan=2, sticky=tk.N+tk.S)
+        frmScroller4Classes.grid(row=row_num, column=0, columnspan=2, sticky=tk.N+tk.S)
         
         # Creating canvas on scroller frame
         self.canvas = tk.Canvas(frmScroller4Classes)
@@ -57,29 +67,22 @@ class AddClass:
         self.canvas.configure(yscrollcommand=myscrollbar.set)
         self.canvas.create_window((0,0),window=self.frmClasses,anchor='nw')
         self.frmClasses.bind("<Configure>", self.onFrameConfigure)
+        row_num += 1
     
-        frmButtons = tk.Frame(self.window)
-        frmButtons.grid(row=3, column=0, columnspan=2)
         # Buttons for quitting and adding the new class
-        btnAddClass = tk.Button(frmButtons,
-                           text="Add Class",
+        btnAddClass = tk.Button(self.window,
+                           text="Add Item",
                            command=self.add_class)
-        btnAddClass.grid(row=0, column=0)
+        btnAddClass.grid(row=row_num, column=0)
         
-        btnQuit = tk.Button(frmButtons, 
+        button = tk.Button(self.window, 
                            text="QUIT", 
                            fg="red",
                            command=self.window.destroy)
-        btnQuit.grid(row=0, column=1)
-        
-        btnAddItems = tk.Button(frmButtons, 
-                           text="Add Sales Items", 
-                           fg="blue",
-                           command=self.open_sales_items_window)
-        btnAddItems.grid(row=0, column=2)
+        button.grid(row=row_num, column=1)
         
         # add title
-        self.window.title("Check Out Data Entry - Main Classes")
+        self.window.title("Check Out Data Entry - Sales Items")
         
         # set frame and geometry (width x height + XPOS + YPOS)
         self.window.geometry("500x500+100+200")
@@ -93,7 +96,6 @@ class AddClass:
         #self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         self.canvas.configure(scrollregion=self.canvas.bbox("all"),width=400,height=200)
     
-    # Adds the class item to the main list.
     def add_class(self):
         class_name = self.txt_name_val.get()
         class_descr = self.txt_descr_val.get()
@@ -107,8 +109,6 @@ class AddClass:
         lblName = tk.Label(self.frmClasses, text=class_name, fg="blue", font=("Arial", 10))
         lblName.grid(row=self.number_of_entries, column=1)
         
-        self.top_classes.append(class_name)
-        
         lblDescr = tk.Label(self.frmClasses, text=class_descr, fg="blue", font=("Arial", 10))
         lblDescr.grid(row=self.number_of_entries, column=2)
         
@@ -116,9 +116,3 @@ class AddClass:
         
         self.txt_name_val.set("")
         self.txt_descr_val.set("")
-        
-    # Opens the window that lets adding sales items with the entered classes
-    # choosable parents.
-    def open_sales_items_window(self):
-        si_win = asi.AddSalesItems()
-        si_win.createSalesItemInputWindow(self.top_classes)
