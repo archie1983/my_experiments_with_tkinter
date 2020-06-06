@@ -11,7 +11,7 @@ class AddClass:
 
     def __init__(self):
         self.window = tk.Tk()
-        
+
         # variables holding the input values
         self.txt_name_val = tk.StringVar()
         self.txt_descr_val = tk.StringVar()
@@ -120,5 +120,9 @@ class AddClass:
     # Opens the window that lets adding sales items with the entered classes
     # choosable parents.
     def open_sales_items_window(self):
+        # current window needs to close first, because in the 
+        # "createSalesItemInputWindow" we'll call self.window.mainloop()
+        # which will not return for some time.
+        self.window.destroy()
         si_win = asi.AddSalesItems(self.top_classes)
         si_win.createSalesItemInputWindow()
