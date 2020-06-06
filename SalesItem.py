@@ -26,6 +26,10 @@ class SalesItem:
         self.page = page
         self.pic_full_path = pic_full_path
         self.parent_id = parent_id
+
+    @property
+    def pic_short_path(self):
+        return self.__pic_file
         
     @property
     def pic_full_path(self):
