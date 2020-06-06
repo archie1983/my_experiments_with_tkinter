@@ -7,12 +7,15 @@ Created on Fri Jun  5 20:32:37 2020
 import tkinter as tk
 from PIL import Image, ImageTk
 from tkinter import filedialog as fd
+import SalesItem as si
 
 # Allow entry of sales items.
 class AddSalesItems:
 
     def __init__(self, top_classes):
         self.window = tk.Tk()
+        
+        self.top_classes = top_classes
         
         # variables holding the input values
         self.txt_name_val = tk.StringVar(self.window)
@@ -23,9 +26,19 @@ class AddSalesItems:
     
         # number of entries added
         self.number_of_entries = len(top_classes)
-        self.top_classes = [""] + top_classes
+        top_classes_names = [""]
+        for tc in top_classes:
+            top_classes_names.append(tc.name)
+
+        self.top_classes_names = top_classes_names
+        self.all_sales_items = top_classes
         
+        # This is the count of the rows on this window's scroller frame
         self.current_item_row = 0
+        
+        # currently selected picture path
+        self.current_pic_path = ""
+        
     
     # Creates the window of sales item entry
     def createSalesItemInputWindow(self):
@@ -48,8 +61,8 @@ class AddSalesItems:
         # Parent class drop down box
         lblTopClass = tk.Label(self.window, text="Top class", fg="black", font=("Arial", 10))
         lblTopClass.grid(row=row_num, column=0)
-        self.parentSelection.set(self.top_classes[0]) # default value
-        optParent = tk.OptionMenu(self.window, self.parentSelection, *self.top_classes)
+        self.parentSelection.set(self.top_classes_names[0]) # default value
+        optParent = tk.OptionMenu(self.window, self.parentSelection, *self.top_classes_names)
         optParent.grid(row=row_num, column=1)
         row_num += 1
 
@@ -138,10 +151,16 @@ class AddSalesItems:
         class_name = self.txt_name_val.get()
         class_descr = self.txt_descr_val.get()
         top_class_name = self.parentSelection.get()
-        top_class_id = 0
+        
+        # finding the top class because we need its ID
+        top_class_item = self.findTopClassFromItsName(top_class_name)
+        if top_class_item is not None:
+            top_class_id = top_class_item.si_id
+        else:
+            top_class_id = 0
+        
         item_price = self.int_price.get()
         item_page = self.int_page.get()
-        cur_row = 0
         
         if class_name == "":
             return
@@ -163,14 +182,27 @@ class AddSalesItems:
         
         lblPage = tk.Label(self.frmClasses, text=item_page, fg="blue", font=("Arial", 10))
         lblPage.grid(row=self.current_item_row, column=5)
-        
-        self.current_item_row += 1
-        self.number_of_entries += 1
+
+        # Creating a sales item from the entered data and adding it to the list
+        self.all_sales_items.append(si.SalesItem(self.number_of_entries + 1,
+                                              class_name,
+                                              class_descr,
+                                              item_price,
+                                              item_page,
+                                              self.current_pic_path,
+                                              top_class_id))
         
         self.txt_name_val.set("")
         self.txt_descr_val.set("")
         self.parentSelection.set("")
         self.int_price.set(0)
+        self.int_page.set(0)
+        self.current_pic_path = ""
+        self.lblImage.image = None
+        self.lblImage.configure(image=None)
+        
+        self.current_item_row += 1
+        self.number_of_entries += 1
         
     # Sets up table header for the sales items that will be added later
     def setUpTableHeader(self):
@@ -195,13 +227,26 @@ class AddSalesItems:
         self.current_item_row += 1
 
     def selectJPEG(self):
-        path = fd.askopenfilename(filetypes=[("Image File",'.jpg')])
-        print("P: ", path)
+        self.current_pic_path = fd.askopenfilename(filetypes=[("Image File",'.jpg')])
+        #print("P: ", self.current_pic_path)
         
-        im = Image.open(path)
+        im = Image.open(self.current_pic_path)
         im = im.resize((75, 75), Image.ANTIALIAS)
         tkimage = ImageTk.PhotoImage(im)
         #myvar=Label(root,image = tkimage)
         self.lblImage.image = tkimage
         self.lblImage.configure(image=tkimage)
-        return path
+        
+        print(self.all_sales_items)
+        
+        #return self.current_pic_path
+    
+    # Finds a SalesItem object in the main collection with a name matching
+    # the given name.
+    def findTopClassFromItsName(self, top_class_name):
+        result = None
+        for tc in self.top_classes:
+            if tc.name == top_class_name:
+                result = tc
+            
+        return result

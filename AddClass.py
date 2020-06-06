@@ -6,6 +6,7 @@ Created on Fri Jun  5 20:28:35 2020
 """
 import tkinter as tk
 import AddSalesItems as asi
+import SalesItem as si
 
 class AddClass:
 
@@ -107,7 +108,7 @@ class AddClass:
         lblName = tk.Label(self.frmClasses, text=class_name, fg="blue", font=("Arial", 10))
         lblName.grid(row=self.number_of_entries, column=1)
         
-        self.top_classes.append(class_name)
+        self.top_classes.append(si.SalesItem(self.number_of_entries + 1, class_name, class_descr))
         
         lblDescr = tk.Label(self.frmClasses, text=class_descr, fg="blue", font=("Arial", 10))
         lblDescr.grid(row=self.number_of_entries, column=2)
