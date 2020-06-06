@@ -16,6 +16,7 @@ class AddSalesItems:
         self.txt_descr_val = tk.StringVar(self.window)
         self.parentSelection = tk.StringVar(self.window)
         self.int_price = tk.IntVar(self.window)
+        self.int_page = tk.IntVar(self.window)
     
         # number of entries added
         self.number_of_entries = len(top_classes)
@@ -54,7 +55,14 @@ class AddSalesItems:
         txtPrice = tk.Entry(self.window, width=5, textvariable=self.int_price)
         txtPrice.grid(row=row_num, column=1)
         row_num += 1
-    
+
+        # Price of the item
+        lblPage = tk.Label(self.window, text="Item page", fg="black", font=("Arial", 10))
+        lblPage.grid(row=row_num, column=0)
+        txtPage = tk.Entry(self.window, width=5, textvariable=self.int_page)
+        txtPage.grid(row=row_num, column=1)
+        row_num += 1
+
         # Frame containing current items
         # 1st creating a form where we'll keep a scrolling canvas
         frmScroller4Classes = tk.Frame(self.window,
@@ -116,6 +124,7 @@ class AddSalesItems:
         top_class_name = self.parentSelection.get()
         top_class_id = 0
         item_price = self.int_price.get()
+        item_page = self.int_page.get()
         cur_row = 0
         
         if class_name == "":
@@ -135,6 +144,10 @@ class AddSalesItems:
 
         lblPrice = tk.Label(self.frmClasses, text=item_price, fg="blue", font=("Arial", 10))
         lblPrice.grid(row=self.current_item_row, column=4)
+        
+        lblPage = tk.Label(self.frmClasses, text=item_page, fg="blue", font=("Arial", 10))
+        lblPage.grid(row=self.current_item_row, column=5)
+        
         self.current_item_row += 1
         self.number_of_entries += 1
         
@@ -158,5 +171,8 @@ class AddSalesItems:
 
         lblPrice = tk.Label(self.frmClasses, text="Price", fg="red", font=("Arial", 10))
         lblPrice.grid(row=self.current_item_row, column=4)
+        
+        lblPage = tk.Label(self.frmClasses, text="Page", fg="red", font=("Arial", 10))
+        lblPage.grid(row=self.current_item_row, column=5)
         
         self.current_item_row += 1
