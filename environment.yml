@@ -23,7 +23,9 @@ dependencies:
   - libtiff=4.1.0=h56a325e_0
   - libxml2=2.9.9=h464c3ec_0
   - lz4-c=1.8.1.2=h2fa13f4_0
+  - olefile=0.46=py37_0
   - openssl=1.1.1g=he774522_0
+  - pillow=7.1.2=py37hcc1f983_0
   - pip=20.0.2=py37_3
   - python=3.7.7=h81c818b_4
   - setuptools=46.4.0=py37_0

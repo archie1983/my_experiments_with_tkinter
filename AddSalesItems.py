@@ -5,7 +5,10 @@ Created on Fri Jun  5 20:32:37 2020
 @author: aelksnis
 """
 import tkinter as tk
+from PIL import Image, ImageTk
+from tkinter import filedialog as fd
 
+# Allow entry of sales items.
 class AddSalesItems:
 
     def __init__(self, top_classes):
@@ -24,6 +27,7 @@ class AddSalesItems:
         
         self.current_item_row = 0
     
+    # Creates the window of sales item entry
     def createSalesItemInputWindow(self):
         row_num = 0
         # Name of the item
@@ -56,11 +60,21 @@ class AddSalesItems:
         txtPrice.grid(row=row_num, column=1)
         row_num += 1
 
-        # Price of the item
+        # Page of the item
         lblPage = tk.Label(self.window, text="Item page", fg="black", font=("Arial", 10))
         lblPage.grid(row=row_num, column=0)
         txtPage = tk.Entry(self.window, width=5, textvariable=self.int_page)
         txtPage.grid(row=row_num, column=1)
+        row_num += 1
+
+        # Button for selecting an image for the new sales item
+        btnChooseImg = tk.Button(self.window,
+                           text="Choose image",
+                           command=self.selectJPEG)
+        btnChooseImg.grid(row=row_num, column=0)
+        
+        self.lblImage = tk.Label(self.window)
+        self.lblImage.grid(row=row_num, column=1)
         row_num += 1
 
         # Frame containing current items
@@ -113,11 +127,13 @@ class AddSalesItems:
         
         self.window.mainloop()
         
+    # Required for scrolling frame
     def onFrameConfigure(self, event):
         '''Reset the scroll region to encompass the inner frame'''
         #self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         self.canvas.configure(scrollregion=self.canvas.bbox("all"),width=400,height=200)
     
+    # Adds sales item
     def add_item(self):
         class_name = self.txt_name_val.get()
         class_descr = self.txt_descr_val.get()
@@ -156,6 +172,7 @@ class AddSalesItems:
         self.parentSelection.set("")
         self.int_price.set(0)
         
+    # Sets up table header for the sales items that will be added later
     def setUpTableHeader(self):
         lblID = tk.Label(self.frmClasses, text="ID", fg="red", font=("Arial", 10))
         lblID.grid(row=self.current_item_row, column=0)
@@ -176,3 +193,15 @@ class AddSalesItems:
         lblPage.grid(row=self.current_item_row, column=5)
         
         self.current_item_row += 1
+
+    def selectJPEG(self):
+        path = fd.askopenfilename(filetypes=[("Image File",'.jpg')])
+        print("P: ", path)
+        
+        im = Image.open(path)
+        im = im.resize((75, 75), Image.ANTIALIAS)
+        tkimage = ImageTk.PhotoImage(im)
+        #myvar=Label(root,image = tkimage)
+        self.lblImage.image = tkimage
+        self.lblImage.configure(image=tkimage)
+        return path
