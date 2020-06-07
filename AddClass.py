@@ -7,6 +7,7 @@ Created on Fri Jun  5 20:28:35 2020
 import tkinter as tk
 import AddSalesItems as asi
 import SalesItem as si
+from functools import partial
 
 class AddClass:
 
@@ -94,30 +95,65 @@ class AddClass:
         #self.canvas.configure(scrollregion=self.canvas.bbox("all"))
         self.canvas.configure(scrollregion=self.canvas.bbox("all"),width=400,height=200)
     
-    # Adds the class item to the main list.
+    # Adds the class item to the main list and displays it in the scroller
+    # form.
     def add_class(self):
         class_name = self.txt_name_val.get()
         class_descr = self.txt_descr_val.get()
         
         if class_name == "":
             return
-        
-        lblID = tk.Label(self.frmClasses, text=(self.number_of_entries + 1), fg="blue", font=("Arial", 10))
-        lblID.grid(row=self.number_of_entries, column=0)
-        
-        lblName = tk.Label(self.frmClasses, text=class_name, fg="blue", font=("Arial", 10))
-        lblName.grid(row=self.number_of_entries, column=1)
-        
+
         self.top_classes.append(si.SalesItem(self.number_of_entries + 1, class_name, class_descr))
         
-        lblDescr = tk.Label(self.frmClasses, text=class_descr, fg="blue", font=("Arial", 10))
-        lblDescr.grid(row=self.number_of_entries, column=2)
+        self.add_all_items_to_scroller()
         
         self.number_of_entries += 1
         
         self.txt_name_val.set("")
         self.txt_descr_val.set("")
         
+    # deletes class identified by its ID
+    def delete_item(self, class_id):
+        new_class_list = []
+        for item in self.top_classes:
+            if item.si_id != class_id:
+                new_class_list.append(item)
+            
+        self.top_classes = new_class_list
+        
+        self.add_all_items_to_scroller()
+
+    # Adds all items to the scroller to be seen and be able to pick for
+    # editing or deleteing.
+    def add_all_items_to_scroller(self):
+        # First clearing the frame
+        for widget in self.frmClasses.winfo_children():
+            widget.destroy()
+        
+        # Now adding the items from the collection
+        row_counter = 0
+        for item in self.top_classes:
+            self.add_item_row_to_scroller(row_counter, item)
+            row_counter += 1
+
+    # Add a single row of the items to the scroller
+    # This needs to be used while iterating through all items.
+    def add_item_row_to_scroller(self, row_counter, item):
+        lblID = tk.Label(self.frmClasses, text=item.si_id, fg="blue", font=("Arial", 10))
+        lblID.grid(row=row_counter, column=0)
+        
+        lblName = tk.Label(self.frmClasses, text=item.name, fg="blue", font=("Arial", 10))
+        lblName.grid(row=row_counter, column=1)
+        
+        lblDescr = tk.Label(self.frmClasses, text=item.descr, fg="blue", font=("Arial", 10))
+        lblDescr.grid(row=row_counter, column=2)
+
+        # Delete button        
+        delete_action = partial(self.delete_item, item.si_id)
+        btnDelete = tk.Button(self.frmClasses, text="Delete", command=delete_action)
+        btnDelete.grid(row=row_counter, column=3)
+    
     # Opens the window that lets adding sales items with the entered classes
     # choosable parents.
     def open_sales_items_window(self):
