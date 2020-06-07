@@ -28,8 +28,12 @@ class AddSalesItems(AddClass):
         # currently selected picture path
         self.current_pic_path = ""
     
-        # number of entries added
-        self.number_of_entries = len(top_classes)
+        # last stored ID, so that we know what to continue with.
+        if (len(top_classes) > 0):
+            self.last_stored_id = top_classes[len(top_classes) - 1].si_id
+        else:
+            self.last_stored_id = 0
+        
         self.top_classes_names = [""]
         for tc in top_classes:
             self.top_classes_names.append(tc.name)
@@ -121,7 +125,7 @@ class AddSalesItems(AddClass):
             self.add_button_name.set("Add " + self.context_of_item)
         else:
             # Creating a sales item from the entered data and adding it to the list
-            self.all_items.append(si.SalesItem(self.number_of_entries + 1,
+            self.all_items.append(si.SalesItem(self.last_stored_id + 1,
                                                   class_name,
                                                   class_descr,
                                                   item_price,
@@ -141,7 +145,7 @@ class AddSalesItems(AddClass):
         self.lblImage.image = None
         self.lblImage.configure(image=None)
         
-        self.number_of_entries += 1        
+        self.last_stored_id += 1        
         
     # Add a single row of the items to the scroller
     # This needs to be used while iterating through all items.
