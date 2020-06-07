@@ -51,6 +51,6 @@ class SalesItem:
                 str(self.page) + "," + \
                 str(self.parent_id) + "," + \
                 self.pic_short_path + "," + \
-                self.pic_full_path
+                self.pic_full_path + "\n"
                 
         return result

@@ -8,6 +8,8 @@ import tkinter as tk
 from PIL import Image, ImageTk
 from tkinter import filedialog as fd
 from functools import partial
+import ntpath
+from shutil import copy2
 import SalesItem as si
 from AddClass import AddClass
 
@@ -31,9 +33,6 @@ class AddSalesItems(AddClass):
         self.top_classes_names = [""]
         for tc in top_classes:
             self.top_classes_names.append(tc.name)
-
-        # number of entries added
-        self.number_of_entries = 0
         
         # What we're editing - for string constants
         self.context_of_item = "Sales Item"
@@ -76,6 +75,13 @@ class AddSalesItems(AddClass):
         # Remove the "Add Sales Items button" as we won't be opening this window
         # again from itself.
         self.btnAddItems.destroy()
+        
+        # In its place put a button to store all CSV data
+        self.btnExportItems = tk.Button(self.frmButtons, 
+                           text="Export all Items", 
+                           fg="blue",
+                           command=self.exportAllItems)
+        self.btnExportItems.grid(row=0, column=2)
 
         # add title
         self.window.title("Check Out Data Entry - Sales Items")
@@ -221,10 +227,26 @@ class AddSalesItems(AddClass):
         self.current_pic_path = fd.askopenfilename(filetypes=[("Image File",'.jpg')])
         #print("P: ", self.current_pic_path)        
         self.display_selected_picture()
-        for sales_item in self.all_items:
-            print(sales_item.csv_line())
+
+    def exportAllItems(self):
+        all_sales_items = self.top_classes + self.all_items
+
+        csv_file = fd.asksaveasfile(mode='w', defaultextension=".csv", filetypes=(("comma separated values file", "*.csv"),("All Files", "*.*") ))
         
-        #return self.current_pic_path
+        if csv_file is None: # asksaveasfile return `None` if dialog closed with "cancel".
+            return
+        else:
+            print(csv_file.name)
+            csv_directory, _ = ntpath.split(csv_file.name)
+            for sales_item in all_sales_items:
+                print(sales_item.csv_line())
+                #text2save = str(text.get(1.0, END)) # starts from `1.0`, not `0.0`
+                csv_file.write(sales_item.csv_line())
+                
+                if sales_item.pic_full_path != "":
+                    copy2(sales_item.pic_full_path, csv_directory)
+
+            csv_file.close() # `()` was missing.
 
     # displays selected picture
     def display_selected_picture(self):

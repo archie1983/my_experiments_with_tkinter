@@ -76,23 +76,23 @@ class AddClass:
         self.canvas.create_window((0,0),window=self.frmItems,anchor='nw')
         self.frmItems.bind("<Configure>", self.onFrameConfigure)
     
-        frmButtons = tk.Frame(self.window)
-        frmButtons.grid(row=2, column=0, columnspan=2)# inside self.window
+        self.frmButtons = tk.Frame(self.window)
+        self.frmButtons.grid(row=2, column=0, columnspan=2)# inside self.window
         
         # Buttons for quitting and adding the new class
         self.add_button_name.set("Add " + self.context_of_item)
-        self.btnAddClass = tk.Button(frmButtons,
+        self.btnAddClass = tk.Button(self.frmButtons,
                            textvariable=self.add_button_name,
                            command=self.add_item)
         self.btnAddClass.grid(row=0, column=0)
         
-        btnQuit = tk.Button(frmButtons, 
+        btnQuit = tk.Button(self.frmButtons, 
                            text="QUIT", 
                            fg="red",
                            command=self.window.destroy)
         btnQuit.grid(row=0, column=1)
         
-        self.btnAddItems = tk.Button(frmButtons, 
+        self.btnAddItems = tk.Button(self.frmButtons, 
                            text="Add Sales Items", 
                            fg="blue",
                            command=self.open_sales_items_window)
