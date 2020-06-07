@@ -23,15 +23,14 @@ class AddSalesItems(AddClass):
         self.parentSelection = tk.StringVar(self.window)
         self.int_price = tk.IntVar(self.window)
         self.int_page = tk.IntVar(self.window)
+        # currently selected picture path
+        self.current_pic_path = ""
     
         # number of entries added
         self.number_of_entries = len(top_classes)
         self.top_classes_names = [""]
         for tc in top_classes:
             self.top_classes_names.append(tc.name)
-        
-        # currently selected picture path
-        self.current_pic_path = ""
 
         # number of entries added
         self.number_of_entries = 0
@@ -81,11 +80,6 @@ class AddSalesItems(AddClass):
         # add title
         self.window.title("Check Out Data Entry - Sales Items")
         
-        # set frame and geometry (width x height + XPOS + YPOS)
-        self.window.geometry("500x500+100+200")
-        
-        self.onFrameConfigure(None)
-        
         self.window.mainloop()
     
     # Adds sales item
@@ -107,14 +101,27 @@ class AddSalesItems(AddClass):
         if class_name == "":
             return
         
-        # Creating a sales item from the entered data and adding it to the list
-        self.all_items.append(si.SalesItem(self.number_of_entries + 1,
-                                              class_name,
-                                              class_descr,
-                                              item_price,
-                                              item_page,
-                                              self.current_pic_path,
-                                              top_class_id))
+        # if we're editing an item, then edit it, otherwise save a new one
+        if self.item_id_being_edited > -1:
+            for item in self.all_items:
+                if item.si_id == self.item_id_being_edited:
+                    item.name = class_name
+                    item.descr = class_descr
+                    item.price = item_price
+                    item.page = item_page
+                    item.pic_full_path = self.current_pic_path
+                    item.parent_id = top_class_id
+            self.item_id_being_edited = -1
+            self.add_button_name.set("Add " + self.context_of_item)
+        else:
+            # Creating a sales item from the entered data and adding it to the list
+            self.all_items.append(si.SalesItem(self.number_of_entries + 1,
+                                                  class_name,
+                                                  class_descr,
+                                                  item_price,
+                                                  item_page,
+                                                  self.current_pic_path,
+                                                  top_class_id))
 
         # Displaying the new list on the screen.
         self.add_all_items_to_scroller()
@@ -158,10 +165,42 @@ class AddSalesItems(AddClass):
         lblPage = tk.Label(self.frmItems, text=item.page, fg="blue", font=("Arial", 10))
         lblPage.grid(row=row_counter, column=5)
 
+        lblPicture = tk.Label(self.frmItems, text=item.pic_short_path, fg="blue", font=("Arial", 10))
+        lblPicture.grid(row=row_counter, column=6)
+        
+        # Edit button        
+        edit_action = partial(self.load_item, item.si_id)
+        btnEdit = tk.Button(self.frmItems, text="Edit", command=edit_action)
+        btnEdit.grid(row=row_counter, column=7)
+
         # Delete button        
         delete_action = partial(self.delete_item, item.si_id)
         btnDelete = tk.Button(self.frmItems, text="Delete", command=delete_action)
-        btnDelete.grid(row=row_counter, column=6)    
+        btnDelete.grid(row=row_counter, column=8)
+    
+    # loads item identified by its ID to allow editing it.
+    def load_item(self, item_id):
+        for item in self.all_items:
+            if item.si_id == item_id:
+                self.txt_name_val.set(item.name)
+                self.txt_descr_val.set(item.descr)
+                
+                top_class = self.findTopClassFromItsID(item.parent_id)
+                if top_class != None:
+                    self.parentSelection.set(top_class.name)
+                else:
+                    self.parentSelection.set("")
+
+                self.int_price.set(item.price)
+                self.int_page.set(item.page)
+                self.current_pic_path = item.pic_full_path
+                
+                self.display_selected_picture()
+                
+                self.item_id_being_edited = item.si_id                
+                break
+
+        self.add_button_name.set("Save " + self.context_of_item)
     
     # Sets up table header for the sales items that will be added later
     def setUpTableHeader(self):
@@ -174,22 +213,27 @@ class AddSalesItems(AddClass):
         
         lblPage = tk.Label(self.frmItems, text="Page", fg="red", font=("Arial", 10))
         lblPage.grid(row=0, column=5)
+        
+        lblPicture = tk.Label(self.frmItems, text="Picture", fg="red", font=("Arial", 10))
+        lblPicture.grid(row=0, column=6)
 
     def selectJPEG(self):
         self.current_pic_path = fd.askopenfilename(filetypes=[("Image File",'.jpg')])
-        #print("P: ", self.current_pic_path)
+        #print("P: ", self.current_pic_path)        
+        self.display_selected_picture()
+        for sales_item in self.all_items:
+            print(sales_item.csv_line())
         
+        #return self.current_pic_path
+
+    # displays selected picture
+    def display_selected_picture(self):
         im = Image.open(self.current_pic_path)
         im = im.resize((125, 125), Image.ANTIALIAS)
         tkimage = ImageTk.PhotoImage(im)
         #myvar=Label(root,image = tkimage)
         self.lblImage.image = tkimage
         self.lblImage.configure(image=tkimage)
-        
-        for sales_item in self.all_items:
-            print(sales_item.csv_line())
-        
-        #return self.current_pic_path
     
     # Finds a SalesItem object in the main collection with a name matching
     # the given name.

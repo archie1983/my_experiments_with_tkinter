@@ -19,6 +19,8 @@ class AddClass:
         # variables holding the input values
         self.txt_name_val = tk.StringVar()
         self.txt_descr_val = tk.StringVar()
+        
+        self.add_button_name = tk.StringVar()
     
         # number of entries added
         self.number_of_entries = 0
@@ -26,6 +28,9 @@ class AddClass:
         
         # What we're editing - for string constants
         self.context_of_item = "Class"
+        
+        # ID of the item being edited if any
+        self.item_id_being_edited = -1
 
     # Draws the main classes window
     def drawMainClassesWindow(self):
@@ -73,11 +78,13 @@ class AddClass:
     
         frmButtons = tk.Frame(self.window)
         frmButtons.grid(row=2, column=0, columnspan=2)# inside self.window
+        
         # Buttons for quitting and adding the new class
-        btnAddClass = tk.Button(frmButtons,
-                           text="Add " + self.context_of_item,
+        self.add_button_name.set("Add " + self.context_of_item)
+        self.btnAddClass = tk.Button(frmButtons,
+                           textvariable=self.add_button_name,
                            command=self.add_item)
-        btnAddClass.grid(row=0, column=0)
+        self.btnAddClass.grid(row=0, column=0)
         
         btnQuit = tk.Button(frmButtons, 
                            text="QUIT", 
@@ -98,7 +105,7 @@ class AddClass:
         self.window.title("Check Out Data Entry - Main Classes")
         
         # set frame and geometry (width x height + XPOS + YPOS)
-        self.window.geometry("500x500+100+200")
+        self.window.geometry("650x500+100+200")
         
         self.onFrameConfigure(None)
     
@@ -109,7 +116,7 @@ class AddClass:
     def onFrameConfigure(self, event):
         '''Reset the scroll region to encompass the inner frame'''
         #self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-        self.canvas.configure(scrollregion=self.canvas.bbox("all"),width=400,height=200)
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"),width=600,height=200)
     
     # Adds the class item to the main list and displays it in the scroller
     # form.
@@ -120,8 +127,17 @@ class AddClass:
         if class_name == "":
             return
 
-        # Creating a new SalesItem
-        self.all_items.append(si.SalesItem(self.number_of_entries + 1, class_name, class_descr))
+        # if we're editing an item, then edit it, otherwise save a new one
+        if self.item_id_being_edited > -1:
+            for item in self.all_items:
+                if item.si_id == self.item_id_being_edited:
+                    item.name = class_name
+                    item.descr = class_descr
+            self.item_id_being_edited = -1
+            self.add_button_name.set("Add " + self.context_of_item)
+        else:
+            # Creating a new SalesItem
+            self.all_items.append(si.SalesItem(self.number_of_entries + 1, class_name, class_descr))
         
         # Displaying the new list on the screen.
         self.add_all_items_to_scroller()
@@ -131,17 +147,6 @@ class AddClass:
         self.txt_name_val.set("")
         self.txt_descr_val.set("")
         
-    # deletes class identified by its ID
-    def delete_item(self, item_id):
-        new_item_list = []
-        for item in self.all_items:
-            if item.si_id != item_id:
-                new_item_list.append(item)
-            
-        self.all_items = new_item_list
-        
-        self.add_all_items_to_scroller()
-
     # Adds all items to the scroller to be seen and be able to pick for
     # editing or deleteing.
     def add_all_items_to_scroller(self):
@@ -170,10 +175,37 @@ class AddClass:
         lblDescr = tk.Label(self.frmItems, text=item.descr, fg="blue", font=("Arial", 10))
         lblDescr.grid(row=row_counter, column=2)
 
+        # Edit button        
+        edit_action = partial(self.load_item, item.si_id)
+        btnEdit = tk.Button(self.frmItems, text="Edit", command=edit_action)
+        btnEdit.grid(row=row_counter, column=3)
+
         # Delete button        
         delete_action = partial(self.delete_item, item.si_id)
         btnDelete = tk.Button(self.frmItems, text="Delete", command=delete_action)
-        btnDelete.grid(row=row_counter, column=3)
+        btnDelete.grid(row=row_counter, column=4)
+
+    # loads item identified by its ID to allow editing it.
+    def load_item(self, item_id):
+        for item in self.all_items:
+            if item.si_id == item_id:
+                self.txt_name_val.set(item.name)
+                self.txt_descr_val.set(item.descr)
+                self.item_id_being_edited = item.si_id
+                break
+
+        self.add_button_name.set("Save " + self.context_of_item)
+
+    # deletes class identified by its ID
+    def delete_item(self, item_id):
+        new_item_list = []
+        for item in self.all_items:
+            if item.si_id != item_id:
+                new_item_list.append(item)
+            
+        self.all_items = new_item_list
+        
+        self.add_all_items_to_scroller()
     
     # Sets up table header for the sales items that will be added later
     def setUpTableHeader(self):
