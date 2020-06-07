@@ -42,3 +42,15 @@ class SalesItem:
             _, self.__pic_file = ntpath.split(pic_full_path)
         else:
             self.__pic_file = ""
+            
+    def csv_line(self):
+        result = str(self.si_id) + "," + \
+                self.name + "," + \
+                self.descr + "," + \
+                str(self.price) + "," + \
+                str(self.page) + "," + \
+                str(self.parent_id) + "," + \
+                self.pic_short_path + "," + \
+                self.pic_full_path
+                
+        return result

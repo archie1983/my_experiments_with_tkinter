@@ -231,13 +231,14 @@ class AddSalesItems:
         #print("P: ", self.current_pic_path)
         
         im = Image.open(self.current_pic_path)
-        im = im.resize((75, 75), Image.ANTIALIAS)
+        im = im.resize((125, 125), Image.ANTIALIAS)
         tkimage = ImageTk.PhotoImage(im)
         #myvar=Label(root,image = tkimage)
         self.lblImage.image = tkimage
         self.lblImage.configure(image=tkimage)
         
-        print(self.all_sales_items)
+        for sales_item in self.all_sales_items:
+            print(sales_item.csv_line())
         
         #return self.current_pic_path
     
