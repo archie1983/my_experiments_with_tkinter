@@ -7,129 +7,77 @@ Created on Fri Jun  5 20:32:37 2020
 import tkinter as tk
 from PIL import Image, ImageTk
 from tkinter import filedialog as fd
+from functools import partial
 import SalesItem as si
+from AddClass import AddClass
 
 # Allow entry of sales items.
-class AddSalesItems:
+class AddSalesItems(AddClass):
 
     def __init__(self, top_classes):
-        self.window = tk.Tk()
+        super().__init__()
         
         self.top_classes = top_classes
         
-        # variables holding the input values
-        self.txt_name_val = tk.StringVar(self.window)
-        self.txt_descr_val = tk.StringVar(self.window)
+        # additional variables holding the input values
         self.parentSelection = tk.StringVar(self.window)
         self.int_price = tk.IntVar(self.window)
         self.int_page = tk.IntVar(self.window)
     
         # number of entries added
         self.number_of_entries = len(top_classes)
-        top_classes_names = [""]
+        self.top_classes_names = [""]
         for tc in top_classes:
-            top_classes_names.append(tc.name)
-
-        self.top_classes_names = top_classes_names
-        self.all_sales_items = top_classes
-        
-        # This is the count of the rows on this window's scroller frame
-        self.current_item_row = 0
+            self.top_classes_names.append(tc.name)
         
         # currently selected picture path
         self.current_pic_path = ""
+
+        # number of entries added
+        self.number_of_entries = 0
         
-    
+        # What we're editing - for string constants
+        self.context_of_item = "Sales Item"
+
     # Creates the window of sales item entry
     def createSalesItemInputWindow(self):
-        row_num = 0
-        # Name of the item
-        lblName = tk.Label(self.window, text="Item name", fg="black", font=("Arial", 10), width="10")
-        lblName.grid(row=row_num, column=0)
-        txtName = tk.Entry(self.window, width=30, textvariable=self.txt_name_val)
-        #txtName.insert(tk.END, "Class name")
-        txtName.grid(row=row_num, column=1)
-        row_num += 1
-    
-        # Description of the item
-        lblDescr = tk.Label(self.window, text="Item description", fg="black", font=("Arial", 10))
-        lblDescr.grid(row=row_num, column=0)
-        txtDescr = tk.Entry(self.window, width=30, textvariable=self.txt_descr_val)
-        txtDescr.grid(row=row_num, column=1)
-        row_num += 1
-
+        self.drawMainClassesWindow()
         # Parent class drop down box
-        lblTopClass = tk.Label(self.window, text="Top class", fg="black", font=("Arial", 10))
-        lblTopClass.grid(row=row_num, column=0)
+        lblTopClass = tk.Label(self.frmInputs, text="Top class", fg="black", font=("Arial", 10))
+        lblTopClass.grid(row=self.row_num, column=0)
         self.parentSelection.set(self.top_classes_names[0]) # default value
-        optParent = tk.OptionMenu(self.window, self.parentSelection, *self.top_classes_names)
-        optParent.grid(row=row_num, column=1)
-        row_num += 1
+        optParent = tk.OptionMenu(self.frmInputs, self.parentSelection, *self.top_classes_names)
+        optParent.grid(row=self.row_num, column=1)
+        self.row_num += 1
 
         # Price of the item
-        lblPrice = tk.Label(self.window, text="Item price", fg="black", font=("Arial", 10))
-        lblPrice.grid(row=row_num, column=0)
-        txtPrice = tk.Entry(self.window, width=5, textvariable=self.int_price)
-        txtPrice.grid(row=row_num, column=1)
-        row_num += 1
+        lblPrice = tk.Label(self.frmInputs, text="Item price", fg="black", font=("Arial", 10))
+        lblPrice.grid(row=self.row_num, column=0)
+        txtPrice = tk.Entry(self.frmInputs, width=5, textvariable=self.int_price)
+        txtPrice.grid(row=self.row_num, column=1)
+        self.row_num += 1
 
         # Page of the item
-        lblPage = tk.Label(self.window, text="Item page", fg="black", font=("Arial", 10))
-        lblPage.grid(row=row_num, column=0)
-        txtPage = tk.Entry(self.window, width=5, textvariable=self.int_page)
-        txtPage.grid(row=row_num, column=1)
-        row_num += 1
+        lblPage = tk.Label(self.frmInputs, text="Item page", fg="black", font=("Arial", 10))
+        lblPage.grid(row=self.row_num, column=0)
+        txtPage = tk.Entry(self.frmInputs, width=5, textvariable=self.int_page)
+        txtPage.grid(row=self.row_num, column=1)
+        self.row_num += 1
 
         # Button for selecting an image for the new sales item
-        btnChooseImg = tk.Button(self.window,
+        btnChooseImg = tk.Button(self.frmInputs,
                            text="Choose image",
                            command=self.selectJPEG)
-        btnChooseImg.grid(row=row_num, column=0)
+        btnChooseImg.grid(row=self.row_num, column=0)
         
-        self.lblImage = tk.Label(self.window)
-        self.lblImage.grid(row=row_num, column=1)
-        row_num += 1
+        self.lblImage = tk.Label(self.frmInputs)
+        self.lblImage.grid(row=self.row_num, column=1)
+        self.row_num += 1
 
-        # Frame containing current items
-        # 1st creating a form where we'll keep a scrolling canvas
-        frmScroller4Classes = tk.Frame(self.window,
-            border=1,
-            relief=tk.GROOVE,
-            background="blue")
-        frmScroller4Classes.grid(row=row_num, column=0, columnspan=2, sticky=tk.N+tk.S)
-        
-        # Creating canvas on scroller frame
-        self.canvas = tk.Canvas(frmScroller4Classes)
-        self.canvas.grid(row=0, column=0)
-        
-        # Creating scrollbar for the canvas, which will be on the same scroller frame.
-        myscrollbar = tk.Scrollbar(frmScroller4Classes,orient="vertical",command=self.canvas.yview)
-        myscrollbar.grid(row=0, column=1, sticky=tk.N+tk.S)
-        
-        # New frame for the contents on the canvas.
-        
-        # Frame containing current items
-        self.frmClasses = tk.Frame(self.canvas)
-        self.canvas.configure(yscrollcommand=myscrollbar.set)
-        self.canvas.create_window((0,0),window=self.frmClasses,anchor='nw')
-        self.frmClasses.bind("<Configure>", self.onFrameConfigure)
-        row_num += 1
-    
-        # The header for the table holding current items
-        self.setUpTableHeader()
-    
-        # Buttons for quitting and adding the new class
-        btnAddItem = tk.Button(self.window,
-                           text="Add Item",
-                           command=self.add_item)
-        btnAddItem.grid(row=row_num, column=0)
-        
-        button = tk.Button(self.window, 
-                           text="QUIT", 
-                           fg="red",
-                           command=self.window.destroy)
-        button.grid(row=row_num, column=1)
-        
+        # Remove the "Add Sales Items button" as we won't be opening this window
+        # again from itself.
+        self.btnAddItems.destroy()
+
         # add title
         self.window.title("Check Out Data Entry - Sales Items")
         
@@ -139,12 +87,6 @@ class AddSalesItems:
         self.onFrameConfigure(None)
         
         self.window.mainloop()
-        
-    # Required for scrolling frame
-    def onFrameConfigure(self, event):
-        '''Reset the scroll region to encompass the inner frame'''
-        #self.canvas.configure(scrollregion=self.canvas.bbox("all"))
-        self.canvas.configure(scrollregion=self.canvas.bbox("all"),width=400,height=200)
     
     # Adds sales item
     def add_item(self):
@@ -165,32 +107,17 @@ class AddSalesItems:
         if class_name == "":
             return
         
-        lblID = tk.Label(self.frmClasses, text=(self.number_of_entries + 1), fg="blue", font=("Arial", 10))
-        lblID.grid(row=self.current_item_row, column=0)
-        
-        lblName = tk.Label(self.frmClasses, text=class_name, fg="blue", font=("Arial", 10))
-        lblName.grid(row=self.current_item_row, column=1)
-        
-        lblDescr = tk.Label(self.frmClasses, text=class_descr, fg="blue", font=("Arial", 10))
-        lblDescr.grid(row=self.current_item_row, column=2)
-        
-        lblParent = tk.Label(self.frmClasses, text=top_class_name, fg="blue", font=("Arial", 10))
-        lblParent.grid(row=self.current_item_row, column=3)
-
-        lblPrice = tk.Label(self.frmClasses, text=item_price, fg="blue", font=("Arial", 10))
-        lblPrice.grid(row=self.current_item_row, column=4)
-        
-        lblPage = tk.Label(self.frmClasses, text=item_page, fg="blue", font=("Arial", 10))
-        lblPage.grid(row=self.current_item_row, column=5)
-
         # Creating a sales item from the entered data and adding it to the list
-        self.all_sales_items.append(si.SalesItem(self.number_of_entries + 1,
+        self.all_items.append(si.SalesItem(self.number_of_entries + 1,
                                               class_name,
                                               class_descr,
                                               item_price,
                                               item_page,
                                               self.current_pic_path,
                                               top_class_id))
+
+        # Displaying the new list on the screen.
+        self.add_all_items_to_scroller()
         
         self.txt_name_val.set("")
         self.txt_descr_val.set("")
@@ -201,30 +128,52 @@ class AddSalesItems:
         self.lblImage.image = None
         self.lblImage.configure(image=None)
         
-        self.current_item_row += 1
-        self.number_of_entries += 1
+        self.number_of_entries += 1        
         
+    # Add a single row of the items to the scroller
+    # This needs to be used while iterating through all items.
+    def add_item_row_to_scroller(self, row_counter, item):
+        top_class = self.findTopClassFromItsID(item.parent_id)
+        
+        if (top_class != None):
+            top_class_name = top_class.name
+        else:
+            top_class_name = ""
+        
+        lblID = tk.Label(self.frmItems, text=item.si_id, fg="blue", font=("Arial", 10))
+        lblID.grid(row=row_counter, column=0)
+        
+        lblName = tk.Label(self.frmItems, text=item.name, fg="blue", font=("Arial", 10))
+        lblName.grid(row=row_counter, column=1)
+        
+        lblDescr = tk.Label(self.frmItems, text=item.descr, fg="blue", font=("Arial", 10))
+        lblDescr.grid(row=row_counter, column=2)
+        
+        lblParent = tk.Label(self.frmItems, text=top_class_name, fg="blue", font=("Arial", 10))
+        lblParent.grid(row=row_counter, column=3)
+
+        lblPrice = tk.Label(self.frmItems, text=item.price, fg="blue", font=("Arial", 10))
+        lblPrice.grid(row=row_counter, column=4)
+        
+        lblPage = tk.Label(self.frmItems, text=item.page, fg="blue", font=("Arial", 10))
+        lblPage.grid(row=row_counter, column=5)
+
+        # Delete button        
+        delete_action = partial(self.delete_item, item.si_id)
+        btnDelete = tk.Button(self.frmItems, text="Delete", command=delete_action)
+        btnDelete.grid(row=row_counter, column=6)    
+    
     # Sets up table header for the sales items that will be added later
     def setUpTableHeader(self):
-        lblID = tk.Label(self.frmClasses, text="ID", fg="red", font=("Arial", 10))
-        lblID.grid(row=self.current_item_row, column=0)
-        
-        lblName = tk.Label(self.frmClasses, text="Name", fg="red", font=("Arial", 10))
-        lblName.grid(row=self.current_item_row, column=1)
-        
-        lblDescr = tk.Label(self.frmClasses, text="Description", fg="red", font=("Arial", 10))
-        lblDescr.grid(row=self.current_item_row, column=2)
-        
-        lblParent = tk.Label(self.frmClasses, text="Parent", fg="red", font=("Arial", 10))
-        lblParent.grid(row=self.current_item_row, column=3)
+        super().setUpTableHeader()
+        lblParent = tk.Label(self.frmItems, text="Parent", fg="red", font=("Arial", 10))
+        lblParent.grid(row=0, column=3)
 
-        lblPrice = tk.Label(self.frmClasses, text="Price", fg="red", font=("Arial", 10))
-        lblPrice.grid(row=self.current_item_row, column=4)
+        lblPrice = tk.Label(self.frmItems, text="Price", fg="red", font=("Arial", 10))
+        lblPrice.grid(row=0, column=4)
         
-        lblPage = tk.Label(self.frmClasses, text="Page", fg="red", font=("Arial", 10))
-        lblPage.grid(row=self.current_item_row, column=5)
-        
-        self.current_item_row += 1
+        lblPage = tk.Label(self.frmItems, text="Page", fg="red", font=("Arial", 10))
+        lblPage.grid(row=0, column=5)
 
     def selectJPEG(self):
         self.current_pic_path = fd.askopenfilename(filetypes=[("Image File",'.jpg')])
@@ -237,7 +186,7 @@ class AddSalesItems:
         self.lblImage.image = tkimage
         self.lblImage.configure(image=tkimage)
         
-        for sales_item in self.all_sales_items:
+        for sales_item in self.all_items:
             print(sales_item.csv_line())
         
         #return self.current_pic_path
@@ -248,6 +197,16 @@ class AddSalesItems:
         result = None
         for tc in self.top_classes:
             if tc.name == top_class_name:
+                result = tc
+            
+        return result
+    
+    # Finds a SalesItem object in the main collection with an ID matching
+    # the given ID.
+    def findTopClassFromItsID(self, top_class_id):
+        result = None
+        for tc in self.top_classes:
+            if tc.si_id == top_class_id:
                 result = tc
             
         return result
