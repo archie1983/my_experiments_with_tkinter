@@ -1,0 +1,9 @@
+name: data_entry_csv
+channels:
+  - defaults
+dependencies:
+  - python=3.7
+  - vtk
+  - tk
+  - pillow
+prefix: C:\Users\aelksnis\AppData\Local\Continuum\anaconda3\envs\data_entry_csv
